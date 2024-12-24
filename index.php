@@ -19,6 +19,17 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="assets/css/estilos.css">
+    <style>
+        .password-hint {
+            font-size: 0.9rem;
+            color: red;
+            margin-top: 5px;
+        }
+
+        .password-hint.valid {
+            color: green;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -74,8 +85,10 @@
                             <input type="text" placeholder="Apellidos" name="apellido_s"id="validationDefault05" required spellcheck="false" data-ms-editor="true">
                             <input type="email" placeholder="Correo Electronico" name="correo"id="validationDefault05" required spellcheck="false" data-ms-editor="true">
                             <input type="text" placeholder="Nombre de Usuario" name="usuario" id="validationDefault05" required spellcheck="false" data-ms-editor="true">
-                            <input type="password" placeholder="Contraseña" name="contrasena" id="validationDefault05" required spellcheck="false" data-ms-editor="true">
-                            <input type="password" placeholder="Repita Contraseña" name="rep_contrasena" id="validationDefault05" required spellcheck="false" data-ms-editor="true">
+                            <input type="password" placeholder="Contraseña" name="contrasena" id="password" required>
+                            <div id="password-hint" class="password-hint"></div>
+                            <input type="password" placeholder="Repita Contraseña" name="rep_contrasena" id="confirm-password" required>
+                            <div id="confirm-password-hint" class="password-hint"></div>
                             <button class="btn btn-outline-success">Regístrarse</button>
                         </form>
                     </div>
@@ -97,5 +110,44 @@
         </div><br><br>
     </div>
         <script src="assets/js/script.js"></script>
+        <script>
+        const passwordField = document.getElementById('password');
+        const confirmPasswordField = document.getElementById('confirm-password');
+        const passwordHint = document.getElementById('password-hint');
+        const confirmPasswordHint = document.getElementById('confirm-password-hint');
+
+        // Validar contraseña
+        passwordField.addEventListener('input', () => {
+            const password = passwordField.value;
+            const regex = /^(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+            if (regex.test(password)) {
+                passwordHint.textContent = 'Contraseña válida';
+                passwordHint.classList.add('valid');
+                passwordHint.classList.remove('invalid');
+            } else {
+                passwordHint.textContent = 'La contraseña debe tener al menos 8 caracteres, incluir una letra minúscula, un número y un carácter especial.';
+                passwordHint.classList.add('invalid');
+                passwordHint.classList.remove('valid');
+            }
+        });
+
+        // Confirmar contraseña
+        confirmPasswordField.addEventListener('input', () => {
+            const password = passwordField.value;
+            const confirmPassword = confirmPasswordField.value;
+
+            if (password === confirmPassword) {
+                confirmPasswordHint.textContent = 'Las contraseñas coinciden.';
+                confirmPasswordHint.classList.add('valid');
+                confirmPasswordHint.classList.remove('invalid');
+            } else {
+                confirmPasswordHint.textContent = 'Las contraseñas no coinciden.';
+                confirmPasswordHint.classList.add('invalid');
+                confirmPasswordHint.classList.remove('valid');
+            }
+        });
+    </script>
 </body>
+ 
 </html>

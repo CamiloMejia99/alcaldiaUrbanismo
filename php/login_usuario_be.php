@@ -1,43 +1,60 @@
-<?php 
-    include 'conexion_be.php';
-    session_start();
-    //$_SESSION['login'] = false;
+<?php
+include 'conexion_be.php';
+session_start();
 
-    $correo = $_POST['correo'];
-    $contrasena = $_POST['contrasena'];
-    $contrasena = hash('sha512', $contrasena);
+// Capturar y sanitizar entradas
+$correo = filter_var($_POST['correo'], FILTER_SANITIZE_EMAIL);
+$contrasena = $_POST['contrasena'];
 
-    $validar_login = mysqli_query($conexion, "SELECT * FROM usuarios WHERE correo = '$correo' and contrasena='$contrasena'"); 
+// Hashear la contraseña ingresada
+$contrasena_hashed = hash('sha512', $contrasena);
 
-    if (mysqli_num_rows($validar_login) > 0){
-
-    //    $_SESSION['login'] = true;
-
-        $_SESSION ['usuario'] = $correo;
-
-        header("location: ../perfil_usuario_be.php");
-        exit();
-
-    }else{
-        echo'
+// Consulta para verificar el usuario y obtener la contraseña registrada
+if ($stmt = $conexion->prepare("SELECT contrasena FROM usuarios WHERE correo = ?")) {
+    // Bind del correo
+    $stmt->bind_param("s", $correo);
+    $stmt->execute();
+    
+    // Obtener el resultado
+    $resultado = $stmt->get_result();
+    
+    if ($resultado->num_rows > 0) {
+        // Usuario encontrado, verificar contraseña
+        $fila = $resultado->fetch_assoc();
+        if ($fila['contrasena'] === $contrasena_hashed) {
+            // Contraseña correcta, iniciar sesión
+            $_SESSION['usuario'] = $correo;
+            header("Location: ../perfil_usuario_be.php");
+            exit();
+        } else {
+            // Contraseña incorrecta
+            echo '
+                <script language="javascript">
+                    alert("Contraseña incorrecta. Intenta de nuevo.");
+                    window.location.href="../index.php";
+                </script>
+            ';
+            exit();
+        }
+    } else {
+        // Usuario no encontrado
+        echo '
             <script language="javascript">
-                alert("Usuario NO existe.");window.location.href="../index.php"
+                alert("Usuario no encontrado. Verifica tus datos.");
+                window.location.href="../index.php";
             </script>
         ';
         exit();
     }
+} else {
+    echo '
+        <script language="javascript">
+            alert("Ocurrió un error inesperado. Intenta más tarde.");
+            window.location.href="../index.php";
+        </script>
+    ';
+    exit();
+}
 
-    /*if (password_verify($contrasena, $validar_login)){
-
-        header("location: ../perfil_usuario_be.php");
-        exit ();
-    }else{
-        echo '
-            <script language="javascript">
-                alert("Contraseña incorrecta.");window.location.href="../index.php"
-            </script>
-        ';
-        exit ();
-    }*/
 
 ?>
